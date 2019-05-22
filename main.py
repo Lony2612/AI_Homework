@@ -1,6 +1,3 @@
-
-from keras.layers import *
-
 from utils import *
 from config import *
 from model import *
@@ -127,10 +124,6 @@ filenames_5 = load_data('./{}/5/*.jpg'.format(data))
 
 assert len(train_A)
 
-
-# ## Other utilities
-# # Training
-# 
 # Show results every 50 iterations.
 t0 = time.time()
 niter = 150
@@ -159,7 +152,7 @@ while gen_iterations < 5000:
         % (epoch, niter, gen_iterations, errDA_sum/display_iters,
            errGA_sum/display_iters, errCyc_sum/display_iters), time.time()-t0)        
         _, A = train_batch.send(4)
-        showG(cycleA_generate, A)        
+        # showG(cycleA_generate, A)        
         errCyc_sum = errGA_sum = errDA_sum = errC_sum = 0
 
 # # Demo
@@ -174,4 +167,4 @@ demo_batch = minibatchAB_demo(train_A, batchSize, fn)
 epoch, A = next(demo_batch) 
 
 _, A = demo_batch.send(8)
-showG(cycleA_generate, A)
+# showG(cycleA_generate, A)

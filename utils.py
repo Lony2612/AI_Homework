@@ -130,31 +130,31 @@ def minibatchAB_demo(dataA, batchsize, fn_y_i=None):
         ep1, A = batchA.send(tmpsize)
         tmpsize = yield ep1, A
 
-from IPython.display import display
-def showX(X, rows=1):
-    assert X.shape[0]%rows == 0
-    int_X = ( (X+1)/2*255).clip(0,255).astype('uint8')
+# from IPython.display import display
+# def showX(X, rows=1):
+#     assert X.shape[0]%rows == 0
+#     int_X = ( (X+1)/2*255).clip(0,255).astype('uint8')
     
-    if channel_first:
-        int_X = np.moveaxis(int_X.reshape(-1,3,128,96), 1, 3)
-    else:
-        if X.shape[-1] == 9:
-            img_x_i = int_X[:,:,:,:3]
-            img_y_i = int_X[:,:,:,3:6]
-            img_y_j = int_X[:,:,:,6:9]
-            int_X = np.concatenate([img_x_i, img_y_i, img_y_j], axis=1)
-        else:
-            int_X = int_X.reshape(-1,128,96, 3)
-    int_X = int_X.reshape(rows, -1, 128, 96,3).swapaxes(1,2).reshape(rows*imageSize,-1, 3)
-    if not isRGB:
-        int_X = cv2.cvtColor(int_X, cv2.COLOR_LAB2RGB)
-    display(Image.fromarray(int_X))
+#     if channel_first:
+#         int_X = np.moveaxis(int_X.reshape(-1,3,128,96), 1, 3)
+#     else:
+#         if X.shape[-1] == 9:
+#             img_x_i = int_X[:,:,:,:3]
+#             img_y_i = int_X[:,:,:,3:6]
+#             img_y_j = int_X[:,:,:,6:9]
+#             int_X = np.concatenate([img_x_i, img_y_i, img_y_j], axis=1)
+#         else:
+#             int_X = int_X.reshape(-1,128,96, 3)
+#     int_X = int_X.reshape(rows, -1, 128, 96,3).swapaxes(1,2).reshape(rows*imageSize,-1, 3)
+#     if not isRGB:
+#         int_X = cv2.cvtColor(int_X, cv2.COLOR_LAB2RGB)
+#     display(Image.fromarray(int_X))
 
 
-def showG(cycleA_generate, A):
-    def G(fn_generate, X):
-        r = np.array([fn_generate([X[i:i+1]]) for i in range(X.shape[0])])
-        return r.swapaxes(0,1)[:,:,0]        
-    rA = G(cycleA_generate, A)
-    arr = np.concatenate([A[:,:,:,:3], A[:,:,:,3:6], A[:,:,:,6:9], rA[0], rA[1]])
-    showX(arr, 5) 
+# def showG(cycleA_generate, A):
+#     def G(fn_generate, X):
+#         r = np.array([fn_generate([X[i:i+1]]) for i in range(X.shape[0])])
+#         return r.swapaxes(0,1)[:,:,0]        
+#     rA = G(cycleA_generate, A)
+#     arr = np.concatenate([A[:,:,:,:3], A[:,:,:,3:6], A[:,:,:,6:9], rA[0], rA[1]])
+#     showX(arr, 5) 
