@@ -11,7 +11,6 @@ from keras.applications import *
 import tensorflow as tf
 
 from keras.optimizers import RMSprop, SGD, Adam
-# from IPython.display import clear_output
 import numpy as np
 
 def __conv_init(a):
@@ -64,7 +63,7 @@ def BASIC_D(nc_in, ndf, max_layers=3, use_sigmoid=True):
     
     # final layer
     _ = ZeroPadding2D(1)(_)
-    _ = conv2d(1, kernel_size=4, name = 'final'.format(out_feat, 1), 
+    _ = conv2d(1, kernel_size=4, name = 'final_{}_{}'.format(out_feat, 1), 
                activation = "sigmoid" if use_sigmoid else None) (_)    
     return Model(inputs=[input_a], outputs=_)
 

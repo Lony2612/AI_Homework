@@ -18,7 +18,7 @@ use_instancenorm = True
 
 loadSize = 143
 imageSize = 128
-batchSize = 16 #1
+batchSize = 16
 lrD = 2e-4
 lrG = 2e-4
 

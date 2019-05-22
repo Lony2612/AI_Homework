@@ -14,18 +14,6 @@ import numpy as np
 from random import randint
 
 
-
-### Configuration
-K.set_learning_phase(1)
-
-# ## Define models
-netGA = UNET_G(imageSize, nc_G_inp, nc_G_out, ngf)
-#netGA.summary()
-
-netDA = BASIC_D(nc_D_inp, ndf, use_sigmoid = not use_lsgan)
-#netDA.summary()
-
-
 # ## cycle_variables
 def cycle_variables(netG1):
     """
@@ -62,6 +50,15 @@ def cycle_variables(netG1):
     fn_generate = K.function([real_input], [fake_output, rec_input])
     return real_input, fake_output, rec_input, fn_generate, alpha
 
+### Configuration
+K.set_learning_phase(1)
+
+# ## Define models
+netGA = UNET_G(imageSize, nc_G_inp, nc_G_out, ngf)
+#netGA.summary()
+
+netDA = BASIC_D(nc_D_inp, ndf, use_sigmoid = not use_lsgan)
+#netDA.summary()
 
 real_A, fake_B, rec_A, cycleA_generate, alpha_A = cycle_variables(netGA)
 
@@ -156,8 +153,8 @@ while gen_iterations < 5000:
     errCyc_sum += errCyc
     gen_iterations+=1
     if gen_iterations%display_iters==0:
-        if gen_iterations%(10*display_iters)==0: # clear_output every 500 iters
-            clear_output()
+        # if gen_iterations%(10*display_iters)==0: # clear_output every 500 iters
+        #     clear_output()
         print('[%d/%d][%d] Loss_D: %f Loss_G: %f loss_cyc: %f'
         % (epoch, niter, gen_iterations, errDA_sum/display_iters,
            errGA_sum/display_iters, errCyc_sum/display_iters), time.time()-t0)        
