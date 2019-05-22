@@ -44,9 +44,12 @@ def BASIC_D(nc_in, ndf, max_layers=3, use_sigmoid=True):
     else:
         input_a = Input(shape=(None, None, nc_in))
     _ = input_a
+    ## 64, k4s2
     _ = conv2d(ndf, kernel_size=4, strides=2, padding="same", name = 'First') (_)
     _ = LeakyReLU(alpha=0.2)(_)
     
+    ## 128, k4s2
+    ## 256, k4s2
     for layer in range(1, max_layers):        
         out_feat = ndf * min(2**layer, 8)
         _ = conv2d(out_feat, kernel_size=4, strides=2, padding="same", 

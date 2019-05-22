@@ -8,6 +8,7 @@ from keras.optimizers import RMSprop, SGD, Adam
 import time
 
 import numpy as np
+import numpy
 from random import randint
 
 
@@ -129,7 +130,10 @@ t0 = time.time()
 niter = 150
 gen_iterations = 0
 epoch = 0
-errCyc_sum = errGA_sum = errDA_sum = errC_sum = 0
+errCyc_sum = 0
+errGA_sum = 0
+errDA_sum = 0
+errC_sum = 0
 
 display_iters = 50
 train_batch = minibatchAB(train_A, batchSize, filenames_5)
@@ -138,7 +142,7 @@ train_batch = minibatchAB(train_A, batchSize, filenames_5)
 while gen_iterations < 5000:
     epoch, A = next(train_batch)   
     errDA  = netD_train([A])
-    errDA_sum +=errDA[0]
+    errDA_sum += errDA[0]
 
     # epoch, trainA, trainB = next(train_batch)
     errGA, errCyc = netG_train([A])
