@@ -365,11 +365,6 @@ netD2 = BASIC_D(nc_D_inp, ndf, use_sigmoid = not use_lsgan)
 netD2.summary()
 
 
-# # Define Variables
-
-# In[9]:
-
-
 def get_alpha_xij(input_tensor):
     alpha = Lambda(lambda x: x[:,:,:, 0:1])(input_tensor)
     x_i_j = Lambda(lambda x: x[:,:,:, 1:])(input_tensor)    
