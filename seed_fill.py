@@ -6,18 +6,24 @@ def seed_fill(img):
     label = 100
     stack_list = []
     h,w = img.shape
+    print(h,w)
     for i in range(1,h-1,1):
         for j in range(1,w-1,1):
+            print("ij %d"%len(stack_list))
             if (img[i][j] == 255):
                 img[i][j] = label
                 stack_list.append((i,j))
                 while len(stack_list)!=0:
+                    print("while %d"%len(stack_list))
+                    # print(stack_list[-1])
                     cur_i = stack_list[-1][0]
                     cur_j = stack_list[-1][1]
-                    print(cur_i,cur_j)
+                    # print(cur_i,cur_j)
                     img[cur_i][cur_j] = label
                     stack_list.remove(stack_list[-1])
                     #######四邻域，可改为八邻域
+                    if (cur_i == 0 or cur_i == h-1 or cur_j == 0 or cur_j == w-1):
+                        continue
                     if (img[cur_i-1][cur_j] == 255):
                         stack_list.append((cur_i-1,cur_j))
                     if (img[cur_i][cur_j-1] == 255):
