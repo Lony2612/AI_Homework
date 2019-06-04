@@ -2,6 +2,7 @@
 the code of my AI Homework in Python
 
 The development of the code:
+
    clothes.py       : The original code                                                 (15%)
 -> main.py          : The seed_fill algorithm                                           (15%)
 -> main_test.py     : The seed_fill algorithm, 8 neiborhood                             (15%)
