@@ -27,27 +27,36 @@ def seed_fill(img, seeds, pthresh, rthresh):
     # 定义扩展次数
     count = 0
     # 定义头部列表允许最大长度
-    head_list_len = 250
+    max_len_head = 375
+
+
+
+
+    deg = 0
 
     # 搜索状态空间
-    while len(stack_list)+len(head_list) != 0:
+    len_head = len(head_list)
+    len_stack = len(stack_list)
+    while len_stack + len_head != 0:
         if count % 10000 == 0:
-            print("expand %d, stack %6d head %6d"%(count, len(stack_list), len(head_list)))
+            print("expand %8d, stack %8d head %8d"%(count, len_stack, len_head))
         # 扩展次数能整除头部列表最大长度时，将头部列表的一部分加到总体列表stack_list中
-        if count % head_list_len == 0:
+        if count % max_len_head == 0:
             # 获取当前头部列表长度
-            head_len = len(head_list)
+            len_head = len(head_list)
             # 当头部列表当前长度大于最大允许长度时，将head_list的一部分加到stack_list中去
-            if head_len > head_list_len:
-                stack_list += head_list[0:head_list_len]
-                head_list = head_list[head_list_len:head_len]
+            if len_head > max_len_head:
+                stack_list += head_list[0:max_len_head]
+                head_list = head_list[max_len_head:len_head]
 
         # 当head_list长度减少到0且stack_list的长度大于head_list的最大允许长度时，从stack_list取一部分给head_list
-        if len(head_list) == 0 and len(stack_list)>=head_list_len:
-            head_list = stack_list[len(stack_list)-head_list_len:len(stack_list)]
-            stack_list = stack_list[0:len(stack_list)-head_list_len]
+        len_head = len(head_list)
+        len_stack = len(stack_list)
+        if len_head == 0 and len_stack>=max_len_head:
+            head_list = stack_list[len_stack-max_len_head:len_stack]
+            stack_list = stack_list[0:len_stack-max_len_head]
         # 当head_list长度减少到0且stack_list的长度小于head_list的最大允许长度时，从stack_list取所有数据给head_list并将stack_list清0
-        elif len(head_list) == 0 and len(stack_list) < head_list_len:
+        elif len_head == 0 and len_stack < max_len_head:
             head_list = stack_list
             stack_list = []
         
@@ -68,19 +77,26 @@ def seed_fill(img, seeds, pthresh, rthresh):
         if isAcceptable(img, [cur_i,cur_j], [cur_i-1,cur_j], pthresh, rthresh, labels, seeds):
             head_list.append((cur_i-1,cur_j))
             labels[cur_i-1][cur_j] = 1
+            deg+=1
         # 判断下边邻接点是否可扩展
         if isAcceptable(img, [cur_i,cur_j], [cur_i,cur_j-1], pthresh, rthresh, labels, seeds):
             head_list.append((cur_i,cur_j-1))
             labels[cur_i][cur_j-1] = 1
+            deg+=1
         # 判断右边邻接点是否可扩展
         if isAcceptable(img, [cur_i,cur_j], [cur_i+1,cur_j], pthresh, rthresh, labels, seeds):
             head_list.append((cur_i+1,cur_j))
             labels[cur_i+1][cur_j] = 1
+            deg+=1
         # 判断上边邻接点是否可扩展
         if isAcceptable(img, [cur_i,cur_j], [cur_i,cur_j+1], pthresh, rthresh, labels, seeds):
             head_list.append((cur_i,cur_j+1))
             labels[cur_i][cur_j+1] = 1
+            deg+=1
     # 当待探索栈为空，返回区域标记
+        len_head = len(head_list)
+        len_stack = len(stack_list)
+    print("total %d"%deg)
     return labels
 
 def changeClothes(img1, img2, labels, HorizontalShift, VerticalShift, savePath):

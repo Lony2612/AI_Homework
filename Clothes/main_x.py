@@ -16,59 +16,35 @@ def seed_fill(img, seeds, pthresh, rthresh):
     h,w = img.shape
     # 定义待扩展栈
     stack_list = []
-    head_list = []
-    # stack_list.append(seeds)
-    head_list.append(seeds)
+    stack_list.append(seeds)
     # 定义已扩展区域
     labels = np.zeros([h,w])
-
-    count = 0
-
-    head_list_len = 5000
-
     # 搜索状态空间
-    while len(stack_list)+len(head_list) != 0:
-        if count% head_list_len == 0:
-            print("expand %d, stack %6d head %6d"%(count, len(stack_list), len(head_list)))
-
-            head_len = len(head_list)
-            # stack_len = len(stack_list)
-            if head_len > head_list_len:
-                stack_list += head_list[0:head_list_len]
-                head_list = head_list[head_list_len:head_len]
-            print("stack %6d head %6d"%(len(stack_list), len(head_list)))
-
-        if len(head_list) == 0 and len(stack_list)>=head_list_len:
-            head_list = stack_list[len(stack_list)-head_list_len:len(stack_list)]
-            stack_list = stack_list[0:len(stack_list)-head_list_len]
-        elif len(head_list) == 0 and len(stack_list) < head_list_len:
-            head_list = stack_list
-            stack_list = []
-        
+    while len(stack_list)!=0:
         # 获取需要扩展的点的坐标
-        cur_i, cur_j = head_list[-1]
+        cur_i = stack_list[-1][0]
+        cur_j = stack_list[-1][1]
         # 标记当前点为已探索
         labels[cur_i][cur_j] = 1
         # 从栈中弹出该点
-        head_list.remove(head_list[-1])
-        count += 1
+        stack_list.remove(stack_list[-1])
+        # print(len(stack_list))
         ### 四邻域扩展，可改为八邻域 ###
-
         # 判断边界条件，防止数组溢出
         if (cur_i == 0 or cur_i == h-1 or cur_j == 0 or cur_j == w-1):
             continue
         
         if isAcceptable(img, [cur_i,cur_j], [cur_i-1,cur_j], pthresh, rthresh, labels, seeds):
-            head_list.append((cur_i-1,cur_j))
+            stack_list.append((cur_i-1,cur_j))
             labels[cur_i-1][cur_j] = 1
         if isAcceptable(img, [cur_i,cur_j], [cur_i,cur_j-1], pthresh, rthresh, labels, seeds):
-            head_list.append((cur_i,cur_j-1))
+            stack_list.append((cur_i,cur_j-1))
             labels[cur_i][cur_j-1] = 1
         if isAcceptable(img, [cur_i,cur_j], [cur_i+1,cur_j], pthresh, rthresh, labels, seeds):
-            head_list.append((cur_i+1,cur_j))
+            stack_list.append((cur_i+1,cur_j))
             labels[cur_i+1][cur_j] = 1
         if isAcceptable(img, [cur_i,cur_j], [cur_i,cur_j+1], pthresh, rthresh, labels, seeds):
-            head_list.append((cur_i,cur_j+1))
+            stack_list.append((cur_i,cur_j+1))
             labels[cur_i][cur_j+1] = 1
     # 当待探索栈为空，返回区域标记
     return labels
@@ -84,8 +60,7 @@ def changeClothes(img1, img2, labels, HorizontalShift, VerticalShift, savePath):
 
 if __name__ == '__main__':
     # 定义4组输入的种子点
-    # seed_list = [(280,221),(95,211),(280,221),(93,211)]
-    seed_list = [(1489,1425),(625,1421),(1861,1461),(625,1421)]
+    seed_list = [(280,221),(95,211),(280,221),(93,211)]
     # 定义是否上衣覆盖下装  是：1；否：2
     cover_list = [2, 1, 2, 1]
     # 定义输入的组数
@@ -97,11 +72,11 @@ if __name__ == '__main__':
     # 定义抠图通道
     channel_list = ["b","b","b","b"]
     # 定义衣物位移
-    shift_list = [[0,0],[-8,0],[-115,0],[105,0]]
+    shift_list = [[0,0],[0,0],[-20,0],[14,0]]
 
-    for ii in range(2,n_group):
+    for ii in range(0,n_group):
         # 构造匹配服装的路径
-        img1_path = "./%s-input%d.jpg"%(group_name[ii],cover_list[ii])
+        img1_path = "./%s_input%d.jpg"%(group_name[ii],cover_list[ii])
         img = cv2.imread(img1_path)
         print(img1_path)
         (B, G, R) = cv2.split(img)
@@ -119,15 +94,15 @@ if __name__ == '__main__':
         labels = seed_fill(R, seeds, pthresh, rthresh)
 
         # 打开上衣的图片
-        img_shirt = cv2.imread('./%s-input1.jpg'%group_name[ii])
+        img_shirt = cv2.imread('./%s_input1.jpg'%group_name[ii])
         # 打开下装的图片
-        img_skirt = cv2.imread('./%s-input2.jpg'%group_name[ii])
+        img_skirt = cv2.imread('./%s_input2.jpg'%group_name[ii])
 
         # 图像合成
         # 如果下装覆盖上衣，则把下装加到上衣图片中
         if cover_list[ii] == 2:
-            changeClothes(img_shirt, img_skirt, labels, HorShift, VerShift, "end_output%d.jpg"%(ii+1))
+            changeClothes(img_shirt, img_skirt, labels, HorShift, VerShift, "output%d.jpg"%(ii+1))
         # 如果上衣覆盖下装，则把上衣加到下装图片中
         else:
-            changeClothes(img_skirt, img_shirt, labels, HorShift, VerShift, "end_output%d.jpg"%(ii+1))
+            changeClothes(img_skirt, img_shirt, labels, HorShift, VerShift, "output%d.jpg"%(ii+1))
         print("The Group %d has been sovled"%(ii+1))

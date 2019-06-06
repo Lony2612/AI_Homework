@@ -2,7 +2,7 @@
 import cv2
 import numpy as np
 import time
-from Stack import *
+import Stack
 
 # def stack_push(stack,)
 
@@ -12,7 +12,7 @@ def isAcceptable(img, point, candidate, pixelThreshold, regionThreshold, labels,
     i,j = seeds
     if (np.abs(int(img[x,y])-int(img[a,b]))<pixelThreshold) and \
         (np.abs(int(img[i,j])-int(img[a,b]))<regionThreshold) and \
-        (a,b) not in labels:
+        labels[a,b] != 1:
         return True
     else:
         return False
@@ -20,53 +20,85 @@ def isAcceptable(img, point, candidate, pixelThreshold, regionThreshold, labels,
 def seed_fill(img, seeds, pthresh, rthresh):
     # 获取图像的尺寸
     h,w = img.shape
+    
     # 定义待扩展栈
-    stack = Stack(1000000)
-    stack.push(seeds)
+    stack = [[0,0] for i in range(1000000)]
+    print(len(stack))
+    sp = -1
+
+    stack[0] = seeds#[int(seeds[0]),int(seeds[1])]
+    sp += 1
 
     # 定义已扩展区域
-    labels = set()
+    labels = np.zeros([h,w])
+    # 定义扩展次数
+    count = 0
 
     # 搜索状态空间
-    while stack.get_length() >= 0:
+    while sp >= 0 :#and count < 200:
+        if count % 10000 == 0:
+            print("expand %8d, stack %8d"%(count, sp+1))
+            # print("       %d, %d"%(stack[sp][0],stack[sp][1]))      
+        
         # 获取需要扩展的点的坐标
-        cur_i, cur_j = stack.pop()
+        cur_i, cur_j = stack[sp]
+        # 从栈中弹出该点
+        sp -= 1
+        # print(sp)
 
         # 标记当前点为已探索
-        labels.add((cur_i,cur_j))
+        labels[cur_i][cur_j] = 1
+        count += 1
         ### 四邻域扩展，可改为八邻域 ###
         # 判断边界条件，防止数组溢出
         if (cur_i == 0 or cur_i == h-1 or cur_j == 0 or cur_j == w-1):
             continue
         # 判断左边邻接点是否可扩展
         if isAcceptable(img, [cur_i,cur_j], [cur_i-1,cur_j], pthresh, rthresh, labels, seeds):
-            stack.push((cur_i-1,cur_j))
-            labels.add((cur_i-1, cur_j))
+            stack[sp]=(cur_i-1,cur_j)
+            sp += 1
+
+            labels[cur_i-1][cur_j] = 1
         # 判断下边邻接点是否可扩展
         if isAcceptable(img, [cur_i,cur_j], [cur_i,cur_j-1], pthresh, rthresh, labels, seeds):
-            stack.push((cur_i,cur_j-1))
-            labels.add((cur_i, cur_j-1))
+            stack[sp]=(cur_i,cur_j-1)
+            sp += 1
+
+            labels[cur_i][cur_j-1] = 1
         # 判断右边邻接点是否可扩展
         if isAcceptable(img, [cur_i,cur_j], [cur_i+1,cur_j], pthresh, rthresh, labels, seeds):
-            stack.push((cur_i+1,cur_j))
-            labels.add((cur_i+1, cur_j))
+            stack[sp]=(cur_i+1,cur_j)
+            sp += 1
+
+            labels[cur_i+1][cur_j] = 1
         # 判断上边邻接点是否可扩展
         if isAcceptable(img, [cur_i,cur_j], [cur_i,cur_j+1], pthresh, rthresh, labels, seeds):
-            stack.push((cur_i,cur_j+1))
-            labels.add((cur_i, cur_j+1))
+            stack[sp]=(cur_i,cur_j+1)
+            sp += 1
+
+            labels[cur_i][cur_j+1] = 1
+    # 当待探索栈为空，返回区域标记
+    # for ii in range(100):
+    #     print("stack %d,%d"%(stack[ii][0],stack[ii][1]))
     return labels
 
 def changeClothes(img1, img2, labels, HorizontalShift, VerticalShift, savePath):
-    for [ii,jj] in labels:
-        img1[ii+VerticalShift][jj+HorizontalShift][:] = img2[ii][jj][:]
+    h,w,_ = img1.shape
+    for ii in range(0,h):
+        for jj in range(0,w):
+            if labels[ii][jj] == True:
+                img1[ii+VerticalShift][jj+HorizontalShift][:] = img2[ii][jj][:]
     cv2.imwrite(savePath,img1)
     pass
 
-def get_boundry(labels):  
+def get_boundry(labels):
+    h,w = labels.shape    
     boundry = 0
-    for item in labels:
-        if boundry < item[0]:
-            boundry = item[0]
+    for ii in range(w):
+        for jj in range(h):
+            if labels[jj][ii] == True:
+                if boundry < jj:
+                    boundry = jj
     return boundry
 
 if __name__ == '__main__':
@@ -82,7 +114,7 @@ if __name__ == '__main__':
     shift_list = [[0,0],[-8,0],[-115,0],[105,0],[0,0],[0,0],[0,0],[0,0]]
 
     start = time.time()
-    for ii in range(0,n_group):
+    for ii in range(3,n_group):
         # 构造匹配服装的路径
         img1_path = "./%s-input4.jpg"%(group_name[ii])
         img = cv2.imread(img1_path)
@@ -105,16 +137,20 @@ if __name__ == '__main__':
             cov = 1
         else:
             cov = 2
+        print("boundry %d, cover %d"%(boundry,cov))
 
         # 构造匹配服装的路径
         img1_path = "./%s-input%d.jpg"%(group_name[ii],cov)
         img = cv2.imread(img1_path)
+        print(img1_path)
         (B, G, R) = cv2.split(img)
 
         # 获取对应图片的种子
         seeds = seed_list[ii]
+        print(seeds)
         # 获取对应图片的阈值
         pthresh,rthresh = thresh_list[ii]
+        print(pthresh,rthresh)
         # 获取需要的位移
         HorShift,VerShift=shift_list[ii]
 
