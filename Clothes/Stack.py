@@ -1,4 +1,18 @@
 class Stack():
+    # # set
+    # def __init__(self, max_len):
+    #     self._array = set()
+    
+    # def push(self, point):
+    #     self._array.add(point)
+    
+    # def pop(self):
+    #     return self._array.pop()
+    
+    # def get_length(self):
+    #     return len(self._array)-1
+    
+    # stack
     def __init__(self, max_len):
         self._array = [[0,0] for i in range(max_len)]
         self._pointer = -1
@@ -13,3 +27,18 @@ class Stack():
     
     def get_length(self):
         return self._pointer+1
+
+    # # list
+    # def __init__(self, max_len):
+    #     self._array = []
+    
+    # def push(self, point):
+    #     self._array.append(point)
+    
+    # def pop(self):
+    #     tail = self._array[-1]
+    #     self._array.remove(self._array[-1])
+    #     return tail
+    
+    # def get_length(self):
+    #     return len(self._array)-1
